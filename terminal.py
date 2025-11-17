@@ -5,6 +5,7 @@ import readline
 import random
 import time
 import re
+import signal
 
 # Definerar filer
 data_file = "data.txt"
@@ -68,7 +69,7 @@ except:
     pass
 
 # Denna kod stänger av ctrl-c för att avsluta koden
-# signal.signal(signal.SIGINT, signal.SIG_IGN)
+signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 # Alla prints använder denna för att lägga till en tomrad över och under för att göra det mer lätläst. Den gör det även möjligt att göra felmeddelanden röda
 def print_style(print_input, status=None):
@@ -99,19 +100,33 @@ def ask_for_input():
         show_pwd = pwd.split("/")[-1]
 
     prompt = f"{company}@laptop {show_pwd} % "
-    cur_input = input(prompt)
 
-    if cur_input.strip():
-        readline.add_history(cur_input)
+    while True:
+        try:
+            cur_input = input(prompt)
+        except EOFError:
+            print_style("\nDu får inte Ctrl+D här :(\n", "error")
+            continue
 
-    return cur_input
+        if cur_input.strip():  
+            readline.add_history(cur_input)
+            return cur_input
+        else:
+            print_style("Du måste skriva något.\n", "error")
 
 # Input funktionen till tävlingen
 def ask_for_input_program():
 
-    cur_input = input("> ")
+    while True:
+        try:
+            cur_input = input("> ")
+        except EOFError:
+            print_style("\nDu får inte Ctrl+D här :(\n", "error")
+            continue
+        
+        return cur_input
     
-    return cur_input
+    
 
 # Hämtar senaste lösenordet och IP:n från respektive filer
 def update_password():
@@ -545,8 +560,8 @@ while True:
         match base_command:
             
             # I production skulle jag kommentera ut första raden, och avkommentera den undre för att göra scriptet svårare att avsluta
-            case "break" | "exit" | "quit":
-            # case "force_quit":
+            # case "break" | "exit" | "quit":
+            case "force_quit":
                 sys.exit()
             case "restore":
                 restore()
